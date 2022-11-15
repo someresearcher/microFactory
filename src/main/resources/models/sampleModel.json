@@ -1,0 +1,53 @@
+{
+  "services":[
+    {
+      "name": "entryservice",
+      "dbms": "dbms1",
+      "database": "db2",
+      "interfaces": [
+        {
+          "name": "process",
+          "partOfHandling": ["writeLog"],
+          "type": "http",
+          "method": "POST",
+          "in": "single",
+          "out": "none",
+          "logic": [
+            {
+              "type": "amqpServiceCall",
+              "query": "logChanged",
+              "service": "layer2",
+              "out": "single"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "layer2",
+      "dbms": "dbms1",
+      "database": "db1",
+      "interfaces": [
+        {
+          "name": "logChange",
+          "query": "logChanged",
+          "partOfHandling": ["writeLog"],
+          "type": "amqp",
+          "in": "single",
+          "logic": [
+            {
+              "type": "databaseAccess",
+              "method": "saveSingle"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "databaseServers": [
+    {
+      "name": "dbms1",
+      "databases": ["db1", "db2"]
+    }
+  ]
+}
